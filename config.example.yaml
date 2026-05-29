@@ -1,0 +1,35 @@
+# OpenCC pipeline configuration.
+#
+# Each stage names a model from the registry in
+# src/constitutional_classifier/model_config.py. Set a stage to null (or omit it)
+# to DISABLE it — the disabled-stage behaviour is documented per stage below.
+
+# Stage 1 — high-recall binary jailbreak detector (TACTIC classifier).
+# Disabled  -> inputs go straight to content moderation.
+jailbreak_detector: jailbreak-detector
+
+# Stage 1b — deobfuscation rephraser (generative; Qwen3.5-9B by default).
+# Disabled  -> a flagged input from the jailbreak detector counts AS a jailbreak (blocked).
+rephraser: rephraser
+
+# Stage 2 — multi-label constitutional content classifier (TACTIC classifier).
+# Disabled  -> no harm check; benign jailbreak-clean inputs are allowed through.
+content_moderation: content-moderation
+
+# Stage 3 — frontier constitutional judge (generative API model).
+# Disabled  -> harm escalations are NOT blocked; instead the input is forwarded
+#              ANNOTATED with a note so the downstream model is aware (see frontier_note).
+frontier_judge: null
+
+# What a confirmed jailbreak / terminal flag does: "block" (fail-closed, default) or
+# "annotate" (forward the text plus a safety note). Callers can override per request.
+default_action: block
+
+# Server bind (local only).
+host: 127.0.0.1
+port: 8000
+
+# Optional per-stage threshold overrides (otherwise the calibrated thresholds shipped
+# in each model's weight_frame.json are used).
+# jailbreak_threshold: 0.5
+# harm_threshold: 0.5

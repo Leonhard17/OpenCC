@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "constitutional-classifier"
+version = "0.1.0"
+description = "Local inference library and service for the OpenCC constitutional-classifier moderation pipeline."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "CeSIA" }]
+dependencies = [
+    "numpy>=1.24",
+    "pydantic>=2.0",
+    "python-dotenv>=1.0",
+    "huggingface_hub>=0.20",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+server = ["fastapi>=0.110", "uvicorn>=0.27"]
+hf = ["torch>=2.1", "transformers>=4.40", "peft>=0.10", "safetensors>=0.4"]
+vllm = ["vllm>=0.4", "hf_transfer>=0.1"]
+anthropic = ["anthropic>=0.30"]
+openai = ["openai>=1.0"]
+dev = ["pytest>=7.0", "ruff>=0.4", "mypy>=1.0"]
+
+[project.scripts]
+constitutional-classifier = "constitutional_classifier.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/constitutional_classifier"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
