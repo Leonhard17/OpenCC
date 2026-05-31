@@ -3,8 +3,8 @@
 Local inference library and service for the OpenCC moderation pipeline: a high-recall
 **jailbreak detector** → **rephraser** (deobfuscation) → **content-moderation classifier**
 → optional **frontier judge**. The classifiers are the finetunes trained with
-[TACTIC](../TACTIC); the generative stages run through an API or vLLM, exactly like
-[REDACT](../REDACT). Every stage is optional and every model is swappable.
+[TACTIC](https://github.com/Leonhard17/TACTIC); the generative stages run through an API or vLLM, exactly like
+[REDACT](https://github.com/CentreSecuriteIA/REDACT). Every stage is optional and every model is swappable.
 
 ```
 input → [jailbreak detector] → benign ─────────────┐
