@@ -1,0 +1,28 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+
+# Secrets / local environment — never commit
+.env
+.env.*
+!.env.example
+
+# uv / HF caches
+.uv-cache/
+*.lock.tmp
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Local scratch
+scratch_*.py

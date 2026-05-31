@@ -53,6 +53,25 @@ def _read_manifest(ckpt_dir: Path) -> dict[str, Any]:
         with open(cfg_path, encoding="utf-8") as f:
             train_cfg = json.load(f)
 
+    # Calibrated thresholds are sometimes published in a sidecar file (TACTIC's
+    # calibrate step writes thresholds.json / threshold.json) rather than merged into
+    # weight_frame.json. Backfill them so the calibrated decision thresholds are used
+    # instead of the 0.5 default; the frame always wins when it already carries them.
+    if not frame.get("thresholds"):
+        side = ckpt_dir / "thresholds.json"
+        if side.exists():
+            with open(side, encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data.get("thresholds"), dict):
+                frame["thresholds"] = data["thresholds"]
+    if frame.get("threshold") is None and "thresholds" not in frame:
+        side = ckpt_dir / "threshold.json"
+        if side.exists():
+            with open(side, encoding="utf-8") as f:
+                data = json.load(f)
+            if data.get("threshold") is not None:
+                frame["threshold"] = float(data["threshold"])
+
     return {"frame": frame, "train_config": train_cfg}
 
 
@@ -190,7 +209,11 @@ class _ClassifierModule:
                 hidden = model_out.hidden_states[-1]
                 pooled = self._last_token_pool(hidden, enc["attention_mask"].to(self.device))
                 logits = self.head(pooled.to(self.head.weight.dtype))
-                if self.objective == "multilabel":
+                if self.objective == "multilabel" or self.num_labels == 1:
+                    # Multilabel heads and the binary jailbreak head (num_labels == 1) are
+                    # independent sigmoids — TACTIC's jailbreak detector is a single sigmoid
+                    # head. Softmax over a lone logit is always 1.0, so it must NOT be used
+                    # for the binary detector even when no objective is recorded.
                     scores = torch.sigmoid(logits.float())
                 else:
                     scores = torch.softmax(logits.float(), dim=-1)
@@ -213,10 +236,25 @@ class HFClassifierBackend(ClassifierBackend):
     """
 
     def __init__(self):
+        import threading
+
         self._models: dict[str, _ClassifierModule] = {}
+        # Serialize lazy model building. Under the FastAPI server, sync endpoints run in a
+        # threadpool, so concurrent first requests would otherwise build the same model in
+        # parallel — which corrupts weight materialization ("Cannot copy out of meta tensor")
+        # and leaves the process unusable. The lock makes the first build atomic; later
+        # requests hit the cache without contention.
+        self._lock = threading.Lock()
 
     def _get(self, model: str) -> _ClassifierModule:
-        if model not in self._models:
+        cached = self._models.get(model)
+        if cached is not None:
+            return cached
+        with self._lock:
+            # Re-check inside the lock: another thread may have built it while we waited.
+            cached = self._models.get(model)
+            if cached is not None:
+                return cached
             from ..model_config import get_model_config
 
             config = get_model_config(model)

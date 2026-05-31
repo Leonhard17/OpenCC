@@ -1,0 +1,6 @@
+# Content-moderation classifier STANDALONE — only the cm escalation model runs.
+jailbreak_detector: null      # skip straight to content moderation
+rephraser: null
+content_moderation: content-moderation   # centrepourlasecuriteia/opencc-cm-escalation
+frontier_judge: null          # escalations forwarded ANNOTATED (no judge)
+default_action: block

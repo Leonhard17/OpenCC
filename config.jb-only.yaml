@@ -1,0 +1,6 @@
+# Jailbreak detector STANDALONE — only the jb escalation model runs.
+jailbreak_detector: jailbreak-detector    # centrepourlasecuriteia/opencc-jb-escalation
+rephraser: null               # a flag is terminal (fail-closed block)
+content_moderation: null      # no harm check after a clean input
+frontier_judge: null
+default_action: block

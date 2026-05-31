@@ -29,6 +29,12 @@ dev = ["pytest>=7.0", "ruff>=0.4", "mypy>=1.0"]
 [project.scripts]
 constitutional-classifier = "constitutional_classifier.cli:main"
 
+[tool.uv]
+# torch's data-pipeline import calls `dill.extend()`, which was removed in dill 0.4. The
+# `vllm` extra pulls dill transitively (via depyf) and otherwise resolves to 0.4.x, which
+# breaks `import torch`. Pin below 0.4 so the classifiers (torch) and vLLM coexist.
+constraint-dependencies = ["dill<0.4"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/constitutional_classifier"]
 

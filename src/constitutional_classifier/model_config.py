@@ -54,7 +54,7 @@ MODEL_REGISTRY: dict[str, ModelConfig] = {
         name="jailbreak-detector",
         kind="classifier",
         backend_type="hf_classifier",
-        hf_repo="PLACEHOLDER_ORG/jailbreak-detector-0.8b",
+        hf_repo="centrepourlasecuriteia/opencc-jb-escalation",
         role="jailbreak_detector",
     ),
     # --- Stage 1b: deobfuscation rephraser (generative) -------------------------------
@@ -75,7 +75,7 @@ MODEL_REGISTRY: dict[str, ModelConfig] = {
         name="content-moderation",
         kind="classifier",
         backend_type="hf_classifier",
-        hf_repo="PLACEHOLDER_ORG/constitutional-classifier-0.8b",
+        hf_repo="centrepourlasecuriteia/opencc-cm-escalation",
         role="content_moderation",
     ),
     # --- Stage 3: frontier constitutional judge (generative API) ----------------------

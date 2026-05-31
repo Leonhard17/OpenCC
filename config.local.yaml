@@ -1,0 +1,22 @@
+# Basic OpenCC pipeline — the two TACTIC escalation classifiers only.
+# Both stages run locally on GPU via the hf_classifier backend; generative stages off.
+
+# Stage 1 — high-recall jailbreak detector  (centrepourlasecuriteia/opencc-jb-escalation)
+jailbreak_detector: jailbreak-detector
+
+# Stage 1b — rephraser DISABLED: a jailbreak-detector flag is terminal (fail-closed block).
+rephraser: null
+
+# Stage 2 — multi-label content moderation  (centrepourlasecuriteia/opencc-cm-escalation)
+content_moderation: content-moderation
+
+# Stage 3 — frontier judge DISABLED: harm escalations are forwarded ANNOTATED with a note.
+frontier_judge: null
+
+default_action: block
+host: 127.0.0.1
+port: 8000
+# Thresholds come from each model's calibrated escalation frame (weight_frame.json /
+# thresholds.json). Uncomment to override globally:
+# jailbreak_threshold: 0.34
+# harm_threshold: 0.5
